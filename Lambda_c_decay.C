@@ -32,7 +32,7 @@ TCanvas *c1 = new TCanvas("Histograms of LambdaC Mass", "", 1000, 500);
 const int TRACK_LONG = 3;
 const int TRACK_DOWN = 5;
 
-#include "fit1MeV_Gaussian.C"
+#include "fit2MeV_Gaussian.C"
 #include "Lambda_c_decay.h"
 #include <TH2.h>
 #include <TStyle.h>
@@ -328,7 +328,7 @@ void Lambda_c_decay::Terminate()
     TString deltaMuStr;
     TString totalStr;
     TString deltaTotalStr;
-TF1 *myLambdaFit = new TF1("myLambdaFit",fit1MeV_Gaussian,2100.,2500.,5);
+TF1 *myLambdaFit = new TF1("myLambdaFit",fit2MeV_Gaussian,2100.,2500.,5);
 myLambdaFit->SetParameter(0,400.);
 myLambdaFit->SetParameter(1,2286);
 myLambdaFit->SetParameter(2, 6);
