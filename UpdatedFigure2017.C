@@ -43,12 +43,12 @@ void UpdatedFigure2017::SlaveBegin(TTree * /*tree*/)
           hists[i][j]->GetYaxis()->SetTitle("Events per 2 MeV");
    }}
 
-   Figure = new TH2D("Figures of Merit", "Biased Multivariate Cut", 20, 0., 20., 20, 0., 1.);
+   Figure = new TH2D("Figures of Merit", "Multivariate Cut on Half Data", 20, 0., 20., 20, 0., 1.);
    Figure->GetXaxis()->SetTitle("PromptPi Chi2");
    Figure->GetYaxis()->SetTitle("PromptPi_ProbNNpi");
    Figure->GetZaxis()->SetTitle("Signal Events / Signal Error");
 
-   File = new TFile("NoMomentumPion.root", "RECREATE");
+   File = new TFile("NoMomentumPiOdd2.root", "RECREATE");
   gFile = File;
 
    c1 = new TCanvas("canvas", "Test Canvas");
@@ -59,14 +59,15 @@ Bool_t UpdatedFigure2017::Process(Long64_t entry)
   GetEntry(entry);
    fReader.SetEntry(entry);
 
-//Conservation of Transverse Momentum in LambdaC Decay
-double LambdaCTransverse = ((*Lambda_cplus_PT) - (*PromptK_PT) - (*PromptPi_PT) - (*Xi_PT));
-
 //Corrected Xi Mass
 double CorrectedXiMass = ((*Xi_MM) - (*Lambda_MM) + 1115.683);
 
 //Corrected Lambda Mass
 double CorrectedLambdaMass = ((*Lambda_cplus_MM) - (*Xi_MM) + (1321.71));
+
+double EvenNumber = (*eventNumber % 2 == 0);
+
+double OddNumber = (*eventNumber % 2 == 1);
 
 	bool MassCuts = (
 		(*Lambda_cplus_MM > 2185. && *Lambda_cplus_MM < 2385.)
@@ -74,39 +75,17 @@ double CorrectedLambdaMass = ((*Lambda_cplus_MM) - (*Xi_MM) + (1321.71));
 );
 
 bool PrecisionCut = (
-//      (LambdaCTransverse > -200. && LambdaCTransverse < 200.)
-   (*PromptK_IPCHI2_OWNPV > 9.)
-//	(*PromptPi_IPCHI2_OWNPV > 9.)
- &&	(*PromptK_ProbNNk > 0.4)
-// &&	(*PromptPi_ProbNNpi > 0.4)
-&&	(*Lambda_cplus_PT > 2000.)
+  	(*Lambda_cplus_PT > 2000.)
+&&  (*PromptK_IPCHI2_OWNPV > 8.)
+&&	(*PromptK_MC15TuneV1_ProbNNk > 0.7)
+//&&  (*PromptPi_IPCHI2_OWNPV > 6.)
+//&&	(*PromptPi_MC15TuneV1_ProbNNpi > 0.7)
 );
-
-  bool EvenPrecisionCut = (
-    		(LambdaCTransverse > -200. && LambdaCTransverse < 200.)
-// 	&&  (*PromptK_IPCHI2_OWNPV > 9.)
-	&&	(*PromptPi_IPCHI2_OWNPV > 9.)
-//	&&	(*PromptK_ProbNNk > 0.4)
-	&&	(*PromptPi_ProbNNpi > 0.4)
- 	&&	(*Lambda_cplus_PT > 2000.)
-);
-
-bool OddPrecisionCut = (
-      (LambdaCTransverse > -200. && LambdaCTransverse < 200.)
-  &&  	(*PromptK_IPCHI2_OWNPV > 8.)
-//  &&	(*PromptPi_IPCHI2_OWNPV > 6.)
-  &&	(*PromptK_ProbNNk > 0.7)
-//  &&	(*PromptPi_ProbNNpi > 0.5)
-&&	(*Lambda_cplus_PT > 2000.)
-);
-
-//even number = (*eventNumber % 2 == 0)
-//odd number = (*eventNumber % 2 == 1)
 
    for (double i = 0; i < 20; i++){
      for (double j = 0; j < 20; j++){
 
-       if (((*PromptPi_IPCHI2_OWNPV) >= i) && ((*PromptPi_ProbNNpi) >= j/20) && MassCuts && PrecisionCut){
+       if (((*PromptPi_IPCHI2_OWNPV) >= i) && ((*PromptPi_MC15TuneV1_ProbNNpi) >= j/20) && MassCuts && PrecisionCut && OddNumber){
 
          hists[i][j]->Fill(CorrectedLambdaMass);}}}
 
@@ -136,7 +115,7 @@ TF1 *myLambdaFit = new TF1("myLambdaFit",fit2MeV_Gaussian,2100.,2500.,5);
 myLambdaFit->SetParameter(0,400.);
 myLambdaFit->SetParameter(1,2286);
 myLambdaFit->SetParameter(2, 6);
-myLambdaFit->SetParLimits(2, 0.,20.);
+myLambdaFit->SetParLimits(2, 0.,10.);
 myLambdaFit->SetParameter(3, 0.);
 myLambdaFit->SetParameter(4, 0.);
 
